@@ -2,13 +2,12 @@
 
 This is the report for
 
- + Firstname Lastname, `stil_id`
- + ...
+ + Filip Cederquist, `mat13fce`
+ + Nellie Duhs, `tpi14ndu`
 
 We solved this project on our own, except for:
 
  + The Peer-review meeting
- + ... describe any other help you've gotten ...
 
 
 ## ER-design
@@ -19,9 +18,7 @@ The model is in the file [`er-model.png`](er-model.png):
     <img src="er-model.png" width="100%">
 </center>
 
-(The image above describes the model from lecture 4, you
-must replace the file '`er-model.png`' with an image of your
-own ER-model).
+The image above describes our suggested ER-model.
 
 
 ## Relations
@@ -35,15 +32,15 @@ so we use bold face for primary keys, italicized face for
 foreign keys, and bold italicized face for attributes which
 are both primary keys and foreign keys):
 
-+ authors(**author_name**, nationality)
-+ books(**isbn**, book_title, published_year, publisher)
-+ authored_books(**_author_name_**, **_isbn_**)
-+ copies(**copy_barcode**, _isbn_, _library_name_, shelf)
-+ ...
++ cookies(**cookie_name**)
++ recipes(amount,**_cookie_name_**, **_ingredient_name_**)
++ ingredients(**ingredient_name**)
++ ingredient_transitions(**transfer_date**, **quantity**, **_ingredient_name_**)
++ orders(**order_id**, order_date, wanted_date)
++ order_specifications(**_order_id_**, **_cookie_name_**)
++ pallet(**bar_code**, prod_date, prod_time, state, blocked, delivery_date, delivery_time, _order_id_, _customer_name_)
++ customer(**customer_name**, address)
 
-(this should be replaced with your own relations, of course,
-but use the same way of marking primary keys and foreign
-keys).
 
 
 ## Scripts to set up database
