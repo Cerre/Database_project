@@ -36,7 +36,7 @@ CREATE TABLE ingredients(
 
 CREATE TABLE ingredient_transitions(
 	quantity			INT,
-	transfer_date		DATE,
+	transfer_date		DATE DEFAULT (datetime('now','localtime')),
 	ingredient_name 	TEXT --Ska den ha en key? i så fall kanske det blir alla tre?
 );
 
@@ -54,18 +54,26 @@ END;
 
 CREATE TABLE pallets(
 	bar_code		TEXT DEFAULT (lower(hex(randomblob(16)))),
-	prod_date 		DATE --DEFAULT GETDATE(), -- Crax är det en befintilig funktion? finns det gettime också?
-	prod_time 		TIME --DEFAULT GETTIME(),
+	prod_date 		DATE DEFAULT (datetime('now','localtime')),
+	prod_time 		TIME DEFAULT (datetime('now','localtime')),
 	state 			TEXT DEFAULT "freezer",		
 	blocked			BIT DEFAULT 0,
-	delivery_date	DATE,
-	delivery_time 	TIME,
+	delivery_date	DATE DEFAULT NULL,
+	delivery_time 	TIME DEFAULT NULL,
 	cookie_name		TEXT,
 	order_id 		INT DEFAULT NULL, 
 	PRIMARY KEY (bar_code),
 	FOREIGN KEY (cookie_name) REFERENCES cookies(cookie_name),
 	FOREIGN KEY (order_id) REFERENCES orders(order_id)
 );
+
+CREATE TRIGGER pallet_creation BEFORE INSERT ON pallets
+BEGIN
+	INSERT INTO ingredient_transitions(ingredient_name, quantity)
+	SELECT ingredient_name, amount
+	FROM recipes
+	WHERE cookie_name == NEW.cookie_name;
+END;
 
 
 CREATE TABLE orders(
