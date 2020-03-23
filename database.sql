@@ -70,9 +70,9 @@ CREATE TABLE pallets(
 CREATE TRIGGER pallet_creation BEFORE INSERT ON pallets
 BEGIN
 	INSERT INTO ingredient_transitions(ingredient_name, quantity)
-	SELECT ingredient_name, amount
+	SELECT ingredient_name, -amount*54
 	FROM recipes
-	WHERE cookie_name == NEW.cookie_name;
+	WHERE cookie_name = NEW.cookie_name;
 END;
 
 
@@ -100,25 +100,6 @@ CREATE TABLE order_specification(
 	FOREIGN KEY (cookie_name) REFERENCES cookies(cookie_name),
 	FOREIGN KEY (order_id) REFERENCES orders(order_id)
 );
-
-
-
-
---LÅTER DESSAA VA HÄR SÅLÄNGE
-/*CREATE TRIGGER update_seats BEFORE INSERT ON tickets
-BEGIN
-	 if performances.remainingSeats < 1
-	 	 -->"Can't buy ticket"
-	 else
-	 	--"buy the ticket"
-	
-
-CREATE TRIGGER default_seats AFTER INSERT ON performances
-BEGIN
-	UPDATE performances
-	SET remainingSeats = (SELECT capacity FROM theaters WHERE theaters.name = performances.theater);
-END;*/
-
 
 
 INSERT
