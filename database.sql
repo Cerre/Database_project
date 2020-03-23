@@ -6,7 +6,7 @@ PRAGMA foreign_keys=OFF;
 DROP TABLE IF EXISTS cookies;
 DROP TABLE IF EXISTS recipes;
 DROP TABLE IF EXISTS ingredients;
-DROP TABLE IF EXISTS ingredient_transtitions;
+DROP TABLE IF EXISTS ingredient_transitions;
 DROP TABLE IF EXISTS pallets;
 DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS customers;
@@ -34,17 +34,28 @@ CREATE TABLE ingredients(
 	PRIMARY KEY (ingredient_name)
 );
 
-CREATE TABLE ingredient_transtitions(
-	quantity 			INT,
+CREATE TABLE ingredient_transitions(
+	quantity			INT,
 	transfer_date		DATE,
-	ingredient_name 	TEXT # Ska den ha en key? i så fall kanske det blir alla tre? f
+	ingredient_name 	TEXT --Ska den ha en key? i så fall kanske det blir alla tre?
 );
+
+
+CREATE TRIGGER check_ingredients BEFORE INSERT ON ingredient_transitions
+BEGIN
+	SELECT CASE
+	WHEN ((SELECT SUM(quantity) FROM ingredient_transitions WHERE ingredient_name = NEW.ingredient_name) + NEW.quantity < 0)
+	THEN RAISE(ABORT, 'Not enough in stock')
+	END;
+END;
+
+
 
 
 CREATE TABLE pallets(
 	bar_code		TEXT DEFAULT (lower(hex(randomblob(16)))),
-	prod_date 		DATE DEFAULT GETDATE(), # Crax är det en befintilig funktion? finns det gettime också?
-	prod_time 		TIME DEFAULT GETTIME(),
+	prod_date 		DATE --DEFAULT GETDATE(), -- Crax är det en befintilig funktion? finns det gettime också?
+	prod_time 		TIME --DEFAULT GETTIME(),
 	state 			TEXT DEFAULT "freezer",		
 	blocked			BIT DEFAULT 0,
 	delivery_date	DATE,
@@ -53,7 +64,7 @@ CREATE TABLE pallets(
 	order_id 		INT DEFAULT NULL, 
 	PRIMARY KEY (bar_code),
 	FOREIGN KEY (cookie_name) REFERENCES cookies(cookie_name),
-	FOREIGN KEY (orders) REFERENCES cookies(order_id)
+	FOREIGN KEY (order_id) REFERENCES orders(order_id)
 );
 
 
@@ -64,7 +75,8 @@ CREATE TABLE orders(
 	customer_name 	TEXT,
 	PRIMARY KEY (order_id),
 	FOREIGN KEY (customer_name) REFERENCES customers(customer_name)
-);
+);	
+
 
 CREATE TABLE customers(
 	customer_name 	TEXT,
@@ -84,7 +96,7 @@ CREATE TABLE order_specification(
 
 
 
-#LÅTER DESSAA VA HÄR SÅLÄNGE
+--LÅTER DESSAA VA HÄR SÅLÄNGE
 /*CREATE TRIGGER update_seats BEFORE INSERT ON tickets
 BEGIN
 	 if performances.remainingSeats < 1
@@ -123,29 +135,53 @@ VALUES ('Nut ring'),
 
 
 INSERT
-INTO 	ingredients(ingredient_name, quantity, unit)
-VALUES 	('Flour', 100 000, 'g'),
-		('Butter', 100 000, 'g'),
-		('Icing sugar', 100 000, 'g'),
-		('Roasted chopped nuts', 100 000, 'g'),
-		('Fine-ground nuts', 100 000, 'g'),
-		('Ground, roasted nuts', 100 000, 'g'),
-		('Bread crumbs', 100 000, 'g'),
-		('Sugar', 100 000, 'g'),
-		('Egg whites', 100 000, 'ml'),
-		('Chocolate', 100 000, 'g'),
-		('Marzipan', 100 000, 'g'),
-		('Eggs', 100 000, 'g'),
-		('Potato starch', 100 000, 'g'),
-		('Wheat flour', 100 000, 'g'),
-		('Sodium bicarbonat', 100 000, 'g'),
-		('Vanilla', 100 000, 'g'),
-		('Chopped almonds', 100 000, 'g'),
-		('Cinnamon', 100 000, 'g'),
-		('Vanilla sugar', 100 000, 'g'),
+INTO ingredients(ingredient_name, unit)
+VALUES 	('Flour', 'g'),
+		('Butter', 'g'),
+		('Icing sugar', 'g'),
+		('Roasted, chopped nuts', 'g'),
+		('Fine-ground nuts', 'g'),
+		('Ground, roasted nuts', 'g'),
+		('Bread crumbs', 'g'),
+		('Sugar', 'g'),
+		('Egg whites', 'ml'),
+		('Chocolate', 'g'),
+		('Marzipan', 'g'),
+		('Eggs', 'g'),
+		('Potato starch', 'g'),
+		('Wheat flour', 'g'),
+		('Sodium bicarbonat', 'g'),
+		('Vanilla', 'g'),
+		('Chopped almonds', 'g'),
+		('Cinnamon', 'g'),
+		('Vanilla sugar', 'g');
 
 INSERT
-INTO	recipes(cookie_name, ingredient_name, quantity)
+INTO 	ingredient_transitions(ingredient_name, quantity)
+VALUES 	('Flour', 100000),
+		('Butter', 100000),
+		('Icing sugar', 100000),
+		('Roasted, chopped nuts', 100000),
+		('Fine-ground nuts', 100000),
+		('Ground, roasted nuts', 100000),
+		('Bread crumbs', 100000),
+		('Sugar', 100000),
+		('Egg whites', 100000),
+		('Chocolate', 100000),
+		('Marzipan', 100000),
+		('Eggs', 100000),
+		('Potato starch', 100000),
+		('Wheat flour', 100000),
+		('Sodium bicarbonat', 100000),
+		('Vanilla', 100000),
+		('Chopped almonds', 100000),
+		('Cinnamon', 100000),
+		('Vanilla sugar', 100000);
+
+
+
+INSERT
+INTO	recipes(cookie_name, ingredient_name, amount)
 VALUES 	('Nut ring', 'Flour', 450),
 		('Nut ring', 'Butter', 450),
 		('Nut ring', 'Icing sugar', 190),
@@ -176,7 +212,7 @@ VALUES 	('Nut ring', 'Flour', 450),
 		('Berliner', 'Icing sugar', 100),
 		('Berliner', 'Eggs', 50),
 		('Berliner', 'Vanilla sugar', 5),
-		('Berliner', 'Chocolate', 60),
+		('Berliner', 'Chocolate', 60);
 
 
 
