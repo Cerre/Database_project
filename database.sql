@@ -36,7 +36,7 @@ CREATE TABLE ingredients(
 
 CREATE TABLE ingredient_transitions(
 	quantity			INT,
-	transfer_date		DATE DEFAULT (datetime('now','localtime')),
+	transfer_date		DATE DEFAULT (date('now')),
 	ingredient_name 	TEXT --Ska den ha en key? i så fall kanske det blir alla tre?
 );
 
@@ -54,8 +54,8 @@ END;
 
 CREATE TABLE pallets(
 	bar_code		TEXT DEFAULT (lower(hex(randomblob(16)))),
-	prod_date 		DATE DEFAULT (datetime('now','localtime')),
-	prod_time 		TIME DEFAULT (datetime('now','localtime')),
+	prod_date 		DATE DEFAULT (date('now')),
+	prod_time 		TIME DEFAULT (time('now','localtime')),
 	state 			TEXT DEFAULT "freezer",		
 	blocked			BIT DEFAULT 0,
 	delivery_date	DATE DEFAULT NULL,
@@ -77,7 +77,7 @@ END;
 
 
 CREATE TABLE orders(
-	order_date		DATE,
+	order_date		DATE DEFAULT (date('now')),
 	order_id		INT,
 	wanted_date		DATE,
 	customer_name 	TEXT,
