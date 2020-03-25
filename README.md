@@ -34,10 +34,10 @@ are both primary keys and foreign keys):
 
 + cookies(**cookie_name**)
 + recipes(amount,**_cookie_name_**, **_ingredient_name_**)
-+ ingredients(**ingredient_name**)
++ ingredients(**ingredient_name**, unit)
 + ingredient_transitions(**transfer_date**, **quantity**, **_ingredient_name_**)
 + orders(**order_id**, order_date, wanted_date)
-+ order_specifications(**_order_id_**, **_cookie_name_**)
++ order_specifications(**_order_id_**, **_cookie_name_**, quantity)
 + pallet(**bar_code**, prod_date, prod_time, state, blocked, delivery_date, delivery_time, _order_id_, _customer_name_)
 + customer(**customer_name**, address)
 
