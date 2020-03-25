@@ -103,9 +103,9 @@ def post_pallets():
       """,  
       [cookie]
     ) 
-    if c.rowcount == 0 :
+    if len(c.fetchall()) == 0:
         response.status = 400
-        return json.dumps({"satus": "no such cookie"}, indent=4)
+        return json.dumps({"status": "no such cookie"}, indent=4)
 
     try: 
         c.execute(
@@ -127,10 +127,47 @@ def post_pallets():
         id = c.fetchone()[0]
         response.status = 200
         return "/pallets/%s" % id
-    except:
+    except sqlite3.Error as err:
         response.status = 404
-        return "not enough ingredients\n"
+        if str(err) == "Not enough in stock":
+            return "not enough ingredients\n"
+        else :
+            return "No such cookie \n"
 
+@get('/pallets')
+def get_pallets():
+    response.content_type = 'database/json'
+   # true_false = {0: "true", 1: "false"}
+    query = """
+        SELECT bar_code, cookie_name, prod_date, customer_name, blocked
+        FROM   pallets
+        LEFT JOIN   orders
+        USING  (order_id)
+        WHERE  1 = 1
+        """
+    params = []
+    if request.query.after:
+        query += "AND prod_date > ?"
+        params.append(request.query.after)
+    if request.query.before:
+        query += "AND prod_date < ?"
+        params.append(request.query.before)
+    if request.query.cookie:
+        query += "AND cookie_name = ?"
+        params.append(request.query.cookie)
+    if request.query.blocked:
+        query += "AND blocked = ?"
+        params.append(request.query.blocked)
+    c = conn.cursor()
+    c.execute(
+        query,
+        params
+    )
+    s = [{"bar_code": bar_code, "cookie_name": cookie_name, "prod_date": prod_date, "customer": customer_name, "blocked": "true" if blocked else "false"}
+         for (bar_code, cookie_name, prod_date, customer_name, blocked) in c]
+
+    response.status = 200
+    return json.dumps({"pallets": s}, indent=4)
 
 
 
