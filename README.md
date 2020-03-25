@@ -45,41 +45,23 @@ are both primary keys and foreign keys):
 
 ## Scripts to set up database
 
-The scripts used to set up and populate the database are in:
+The script used to set up and populate the database is in:
 
- + [`create-schema.sql`](create-schema.sql) (defines the tables), and
- + [`initial-data.sql`](initial-data.sql) (inserts data).
+ + [`database.sql`](database.sql) (defines the tables and inserts data)
 
 So, to create and initialize the database, we run:
 
 ```shell
-sqlite3 krusty-db.sqlite < create-schema.sql
-sqlite3 krusty-db.sqlite < initial-data.sql
+sqlite3 db.sqlite < database.sql
 ```
-
-(or whatever you call your database file).
 
 ## How to compile and run the program
 
-This section should give a few simple commands to type to
-compile and run the program from the command line, such as:
+To compile and run the program from the command line type:
 
 ```shell
-./gradlew run
+python3 api.py
 ```
 
-or
-
-```shell
-javac -d bin/ -cp src src/krusty/Main.java
-java -cp bin:sqlite-jdbc.jar krusty.Main
-```
-
-or, if you put your commands into a `Makefile`:
-
-```shell
-make compile
-make run
-```
 
 

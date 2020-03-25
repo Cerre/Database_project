@@ -26,7 +26,7 @@ def post_reset():
     c = conn.cursor()
     c.executescript(query)
     response.status = 200
-    return "OK"
+    return json.dumps({"status" : "ok"}, indent=4)
 
 @get('/customers')
 def get_customers():
@@ -53,8 +53,8 @@ def get_ingredients():
         GROUP BY ingredient_name
         """
     )
-    s = [{"ingredient": ingredient, "quantity": tot_quantity, "unit": unit}
-         for (ingredient, tot_quantity, unit) in c]
+    s = [{"name": ingredient_name, "quantity": tot_quantity, "unit": unit}
+         for (ingredient_name, tot_quantity, unit) in c]
     return json.dumps({"ingredients": s}, indent=4)
 
 
@@ -68,7 +68,7 @@ def get_cookies():
         ORDER BY cookie_name
         """
     )
-    s = [{"cookie": cookie_name} for (cookie_name) in c] 
+    s = [{"name": cookie_name[0]} for cookie_name in c] 
     return json.dumps({"cookies": s}, indent=4)
 
 @get('/recipes')
@@ -126,18 +126,13 @@ def post_pallets():
         )
         id = c.fetchone()[0]
         response.status = 200
-        return "/pallets/%s" % id
-    except sqlite3.Error as err:
-        response.status = 404
-        if str(err) == "Not enough in stock":
-            return "not enough ingredients\n"
-        else :
-            return "No such cookie \n"
+        return json.dumps({"status" : "ok", "id" : id}, indent=4)
+    except:
+        return json.dumps({"status": "not enough ingredients"}, indent=4)
 
 @get('/pallets')
 def get_pallets():
     response.content_type = 'database/json'
-   # true_false = {0: "true", 1: "false"}
     query = """
         SELECT bar_code, cookie_name, prod_date, customer_name, blocked
         FROM   pallets
@@ -163,12 +158,40 @@ def get_pallets():
         query,
         params
     )
-    s = [{"bar_code": bar_code, "cookie_name": cookie_name, "prod_date": prod_date, "customer": customer_name, "blocked": "true" if blocked else "false"}
+    s = [{"bar_code": bar_code, "cookie": cookie_name, "prod_date": prod_date, "customer": customer_name, "blocked": blocked}
          for (bar_code, cookie_name, prod_date, customer_name, blocked) in c]
 
     response.status = 200
     return json.dumps({"pallets": s}, indent=4)
 
+@post('/block/<cookie_name>/<from_date>/<to_date>')
+def post_block(cookie_name, from_date, to_date):
+    response.content_type = 'theater/json'
+    c = conn.cursor()
+    c.execute(
+        """
+        UPDATE pallets
+        SET    blocked = 1
+        WHERE  cookie_name = ? AND prod_date >= ? AND prod_date <= ?
+        """,
+        [cookie_name, from_date, to_date]
+    )
+    response.status = 200
+    return json.dumps({"status" : "ok"}, indent=4)
 
+@post('/unblock/<cookie_name>/<from_date>/<to_date>')
+def post_unblock(cookie_name, from_date, to_date):
+    response.content_type = 'theater/json'
+    c = conn.cursor()
+    c.execute(
+        """
+        UPDATE pallets
+        SET    blocked = 0
+        WHERE  cookie_name = ? AND prod_date > ? AND prod_date < ?
+        """,
+        [cookie_name, from_date, to_date]
+    )
+    response.status = 200
+    return json.dumps({"status" : "ok"}, indent=4)
 
 run(host=HOST, port=PORT, debug=True)
